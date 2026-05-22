@@ -1,72 +1,765 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Game — Développement de l'enfant 0-3 ans</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B;
+    --red-dark: #922B21;
+    --red-light: #FADBD8;
+    --cream: #FDF8F3;
+    --ink: #1C1C1C;
+    --ink-light: #555;
+    --stone: #F0EBE3;
+    --stone-mid: #DDD5C8;
+    --success: #1E7E5A;
+    --success-light: #D5F0E5;
+    --error-light: #FADBD8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://glitch.com/favicon.ico" />
+  /* INTRO */
+  #screen-intro {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px 24px;
+    background: var(--ink); position: relative; overflow: hidden;
+  }
+  #screen-intro::before {
+    content: ''; position: absolute; top: -200px; right: -200px;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,57,43,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .intro-badge {
+    background: var(--red); color: white; font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px;
+    border-radius: 20px; margin-bottom: 32px;
+  }
+  .intro-title {
+    font-family: 'DM Serif Display', serif; font-size: clamp(34px, 8vw, 56px);
+    color: white; text-align: center; line-height: 1.1; margin-bottom: 10px;
+  }
+  .intro-title em { color: var(--red); font-style: italic; }
+  .intro-subtitle { color: rgba(255,255,255,0.5); font-size: 15px; text-align: center; margin-bottom: 44px; font-weight: 300; }
+  .intro-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 24px 28px; max-width: 460px; width: 100%; margin-bottom: 32px;
+  }
+  .intro-card h3 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+  .intro-rule { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; color: rgba(255,255,255,0.65); font-size: 14px; line-height: 1.5; }
+  .intro-rule span:first-child { color: var(--red); font-weight: 700; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .btn-start {
+    background: var(--red); color: white; border: none; padding: 17px 44px;
+    font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-start:hover { background: var(--red-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(192,57,43,0.4); }
 
-    <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-    <title>Hello World!</title>
+  /* HEADER */
+  .game-header {
+    background: white; border-bottom: 1px solid var(--stone-mid); padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .game-logo { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--red); }
+  .progress-bar-wrap { flex: 1; max-width: 220px; margin: 0 16px; }
+  .progress-label { font-size: 11px; color: var(--ink-light); margin-bottom: 4px; text-align: center; font-weight: 500; }
+  .progress-bar { height: 6px; background: var(--stone); border-radius: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--red); border-radius: 10px; transition: width 0.5s ease; }
+  .score-badge { background: var(--stone); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
 
-    <!-- The website stylesheet -->
-    <link rel="stylesheet" href="/style.css" />
+  /* GAME BODY */
+  #screen-game { display: none; min-height: 100vh; flex-direction: column; }
+  .game-body { flex: 1; max-width: 660px; margin: 0 auto; padding: 28px 20px 60px; width: 100%; }
 
-    <!-- The website JavaScript file -->
-    <script src="/script.js" defer></script>
-  </head>
-  <body>
-    <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-    <div class="wrapper">
-      <div class="content" role="main">
-        <h1 class="title">Hello World!</h1>
-        <img
-          src="https://cdn.glitch.com/a9975ea6-8949-4bab-addb-8a95021dc2da%2Fillustration.svg?v=1618177344016"
-          class="illustration"
-          alt="Editor illustration"
-          title="Click the image!"
-        />
-        <div class="instructions">
-          <h2>Using this project</h2>
-          <p>
-            This is the Glitch <strong>Hello Website</strong> project. You can
-            use it to build your own site. Check out the code in the editor and open
-            the <span class="fileopener" data-file="TODO.md" data-line="0"
-              >TODO</span> for next steps!
-          </p>
-          <!--  🚧 TODO: ADD BUTTON HERE -->
+  /* CODE DISPLAY */
+  .code-display { background: white; border: 1px solid var(--stone-mid); border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; }
+  .code-display h4 { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 14px; }
+  .code-slots { display: flex; gap: 5px; flex-wrap: wrap; }
+  .code-slot {
+    width: 34px; height: 38px; border: 2px solid var(--stone-mid); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink);
+    transition: all 0.3s; background: var(--stone); position: relative; flex-shrink: 0;
+  }
+  .code-slot.filled { border-color: var(--red); background: white; color: var(--red); }
+  .code-slot.missed { border-color: var(--stone-mid); background: var(--stone); }
+  .code-slot-label { position: absolute; bottom: -16px; font-size: 9px; color: var(--ink-light); font-weight: 500; }
 
-          <!-- Once you've added the button from TODO.md, click it in the page -->
-          <!-- Check out the function in script.js to see how it works -->
-        </div>
-      </div>
+  /* ENIGME */
+  .enigme-card { display: none; animation: slideIn 0.35s ease; }
+  .enigme-card.active { display: block; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .enigme-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .enigme-num-badge {
+    background: var(--red); color: white; width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
+  }
+  .enigme-type-badge {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--ink-light); background: var(--stone); padding: 4px 10px; border-radius: 20px;
+  }
+  .enigme-title { font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1.2; color: var(--ink); margin-bottom: 16px; }
+  .enigme-question { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin-bottom: 14px; }
+  .enigme-hint {
+    background: var(--stone); border-left: 3px solid var(--stone-mid); padding: 11px 14px;
+    border-radius: 0 8px 8px 0; font-size: 13px; color: var(--ink-light); font-style: italic;
+    margin-bottom: 24px; line-height: 1.5;
+  }
+
+  /* OPTIONS QCM */
+  .options-grid { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+  .option-btn {
+    background: white; border: 2px solid var(--stone-mid); border-radius: 11px;
+    padding: 14px 18px; text-align: left; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px; color: var(--ink); transition: all 0.15s; display: flex; align-items: center; gap: 12px; line-height: 1.4;
+  }
+  .option-letter {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--stone);
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    font-size: 12px; color: var(--ink-light); flex-shrink: 0; transition: all 0.15s;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--red); background: var(--red-light); }
+  .option-btn:hover:not(:disabled) .option-letter { background: var(--red); color: white; }
+  .option-btn.correct { border-color: var(--success); background: var(--success-light); }
+  .option-btn.correct .option-letter { background: var(--success); color: white; }
+  .option-btn.wrong { border-color: var(--red); background: var(--error-light); opacity: 0.7; }
+  .option-btn.wrong .option-letter { background: var(--red); color: white; }
+  .option-btn:disabled { cursor: default; }
+
+  /* VRAI/FAUX */
+  .vf-grid { display: flex; gap: 12px; margin-bottom: 18px; }
+  .vf-btn {
+    flex: 1; padding: 18px; border: 2px solid var(--stone-mid); border-radius: 11px;
+    background: white; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; transition: all 0.15s; text-align: center;
+  }
+  .vf-btn:hover:not(:disabled) { border-color: var(--red); background: var(--red-light); color: var(--red); }
+  .vf-btn.correct { border-color: var(--success); background: var(--success-light); color: var(--success); }
+  .vf-btn.wrong { border-color: var(--red); background: var(--error-light); color: var(--red); opacity: 0.7; }
+  .vf-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback { display: none; border-radius: 11px; padding: 16px 18px; margin-bottom: 18px; font-size: 14px; line-height: 1.6; }
+  .feedback.correct { background: var(--success-light); border: 1.5px solid var(--success); color: #0f5c3a; }
+  .feedback.wrong { background: var(--error-light); border: 1.5px solid var(--red); color: #7b1a12; }
+  .feedback-icon { font-size: 18px; margin-bottom: 5px; display: block; }
+  .feedback strong { display: block; font-size: 14.5px; margin-bottom: 3px; }
+
+  /* BOUTON SUIVANT */
+  .btn-next {
+    display: none; background: var(--ink); color: white; border: none;
+    padding: 15px 32px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    border-radius: 50px; cursor: pointer; transition: all 0.2s; width: 100%;
+  }
+  .btn-next:hover { background: var(--red); transform: translateY(-1px); }
+
+  /* TABLEAU */
+  .tableau-toggle {
+    display: flex; align-items: center; gap: 8px; background: none;
+    border: 1.5px solid var(--stone-mid); border-radius: 9px; padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-light);
+    cursor: pointer; width: 100%; text-align: left; margin-bottom: 10px; transition: all 0.15s;
+  }
+  .tableau-toggle:hover { border-color: var(--red); color: var(--red); }
+  .tableau-wrap { display: none; overflow-x: auto; margin-bottom: 22px; border: 1px solid var(--stone-mid); border-radius: 11px; }
+  .tableau-wrap.open { display: block; }
+  table.ref { width: 100%; border-collapse: collapse; font-size: 11.5px; min-width: 540px; }
+  table.ref th { background: var(--ink); color: white; padding: 9px 11px; text-align: left; font-weight: 600; font-size: 10.5px; letter-spacing: 0.5px; }
+  table.ref td { padding: 9px 11px; border-bottom: 1px solid var(--stone); vertical-align: top; line-height: 1.45; }
+  table.ref tr:nth-child(even) td { background: var(--stone); }
+  .age-pill { display: inline-block; background: var(--red); color: white; border-radius: 5px; padding: 2px 7px; font-weight: 700; font-size: 11px; white-space: nowrap; }
+
+  /* ÉCRAN CODE */
+  #screen-code {
+    display: none; min-height: 100vh; flex-direction: column; align-items: center;
+    justify-content: center; padding: 40px 24px; background: var(--ink); text-align: center;
+  }
+  .code-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: white; margin-bottom: 8px; }
+  .code-subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 36px; }
+  .code-slots-final { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+  .code-slot-final {
+    width: 46px; height: 52px; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 22px; color: white; flex-direction: column; gap: 2px;
+  }
+  .code-slot-final span { font-size: 9px; color: rgba(255,255,255,0.35); font-family: 'DM Sans', sans-serif; }
+  .code-input-wrap { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .code-input {
+    width: 46px; height: 52px; border: 2px solid rgba(255,255,255,0.3); border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: white; font-family: 'DM Serif Display', serif;
+    font-size: 22px; text-align: center; text-transform: uppercase; outline: none;
+    transition: border-color 0.2s;
+  }
+  .code-input:focus { border-color: var(--red); }
+  .btn-validate {
+    background: var(--red); color: white; border: none; padding: 15px 40px;
+    font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    border-radius: 50px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+  }
+  .btn-validate:hover { background: var(--red-dark); transform: translateY(-2px); }
+  .code-error { color: rgba(255,100,100,0.9); font-size: 13px; min-height: 20px; margin-bottom: 12px; }
+  .btn-skip { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-skip:hover { color: rgba(255,255,255,0.6); }
+
+  /* ÉCRAN RÉSULTAT */
+  #screen-result {
+    display: none; min-height: 100vh; flex-direction: column; align-items: center;
+    justify-content: center; padding: 40px 24px; text-align: center; background: var(--cream);
+  }
+  .result-medal { font-size: 68px; margin-bottom: 18px; display: block; }
+  .result-title { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--ink); margin-bottom: 8px; }
+  .result-sub { font-size: 15px; color: var(--ink-light); margin-bottom: 32px; line-height: 1.6; max-width: 420px; }
+  .result-score-card { background: var(--ink); border-radius: 18px; padding: 28px 36px; margin-bottom: 20px; width: 100%; max-width: 380px; }
+  .result-score-big { font-family: 'DM Serif Display', serif; font-size: 60px; color: white; line-height: 1; margin-bottom: 4px; }
+  .result-score-label { color: rgba(255,255,255,0.45); font-size: 13px; margin-bottom: 20px; }
+
+  /* MESSAGE DÉBLOQUÉ */
+  .message-debloque {
+    background: linear-gradient(135deg, #1E7E5A, #145c40);
+    border-radius: 14px; padding: 24px 28px; margin-bottom: 24px;
+    max-width: 480px; width: 100%; text-align: left;
+  }
+  .message-debloque-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+  .message-debloque-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: white; line-height: 1.5; font-style: italic; }
+  .message-debloque-sign { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 10px; }
+
+  .btn-restart {
+    background: var(--red); color: white; border: none; padding: 15px 36px;
+    font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    border-radius: 50px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-restart:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+  @media (max-width: 480px) {
+    .game-header { flex-wrap: wrap; gap: 8px; }
+    .progress-bar-wrap { order: 3; max-width: 100%; flex: 1 1 100%; margin: 0; }
+    .code-slot { width: 28px; height: 32px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="screen-intro">
+  <div class="intro-badge">Activité individuelle en autonomie</div>
+  <h1 class="intro-title">Escape Game<br><em>Développement</em><br>0 – 3 ans</h1>
+  <p class="intro-subtitle">20 questions · QCM et vrai/faux · Code final à déchiffrer</p>
+  <div class="intro-card">
+    <h3>Comment jouer</h3>
+    <div class="intro-rule"><span>①</span><span>Lis chaque question attentivement avant de répondre.</span></div>
+    <div class="intro-rule"><span>②</span><span>Consulte le tableau de référence à chaque étape si tu en as besoin.</span></div>
+    <div class="intro-rule"><span>③</span><span>Chaque bonne réponse t'apporte une lettre ou un chiffre pour construire le code final.</span></div>
+    <div class="intro-rule"><span>④</span><span>Entre le code complet à la fin pour débloquer ton message de validation.</span></div>
+  </div>
+  <button class="btn-start" onclick="startGame()">Commencer →</button>
+</div>
+
+<!-- JEU -->
+<div id="screen-game">
+  <div class="game-header">
+    <div class="game-logo">Escape Game</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label" id="progress-label">Question 1 / 20</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     </div>
-    <!-- The footer holds our remix button — you can keep or delete it ✂ -->
-    <footer class="footer">
-      <div class="links"></div>
-      <a
-        class="btn--remix"
-        target="_top"
-        href="https://glitch.com/edit/#!/remix/glitch-hello-website"
-      >
-        <img
-          src="https://cdn.glitch.com/605e2a51-d45f-4d87-a285-9410ad350515%2FLogo_Color.svg?v=1618199565140"
-          alt=""
-        />
-        Remix on Glitch
-      </a>
-    </footer>
-  </body>
+    <div class="score-badge" id="score-badge">0 / 0</div>
+  </div>
+  <div class="game-body">
+    <div class="code-display">
+      <h4>Code en construction</h4>
+      <div class="code-slots" id="code-slots"></div>
+    </div>
+    <div id="enigme-container"></div>
+  </div>
+</div>
+
+<!-- SAISIE DU CODE -->
+<div id="screen-code">
+  <div class="code-title">Le code final</div>
+  <div class="code-subtitle">Voici les éléments que tu as collectés</div>
+  <div class="code-slots-final" id="code-slots-final"></div>
+  <div class="code-subtitle" style="margin-bottom:16px;">Entre le code complet pour débloquer ton message</div>
+  <div class="code-input-wrap" id="code-input-wrap"></div>
+  <div class="code-error" id="code-error"></div>
+  <button class="btn-validate" onclick="validateCode()">Valider le code</button><br>
+  <button class="btn-skip" onclick="showResult(false)">Passer sans valider</button>
+</div>
+
+<!-- RÉSULTAT -->
+<div id="screen-result">
+  <span class="result-medal" id="result-medal">🏆</span>
+  <h2 class="result-title" id="result-title">Bravo !</h2>
+  <p class="result-sub" id="result-sub"></p>
+  <div class="result-score-card">
+    <div class="result-score-big" id="result-score-big"></div>
+    <div class="result-score-label">bonnes réponses sur 20</div>
+  </div>
+  <div class="message-debloque" id="message-debloque" style="display:none;">
+    <div class="message-debloque-label">✓ Message débloqué</div>
+    <div class="message-debloque-text" id="message-debloque-text"></div>
+    <div class="message-debloque-sign">Formation développement de l'enfant 0-3 ans</div>
+  </div>
+  <button class="btn-restart" onclick="restartGame()">Recommencer</button>
+</div>
+
+<script>
+const ENIGMES = [
+  // --- 3 MOIS ---
+  {
+    num: 1, titre: "Les tout premiers sons", type: "qcm",
+    question: "Parmi ces comportements, lequel est caractéristique du bébé à 3 mois sur le plan du langage ?",
+    hint: "Observe un bébé de cet âge : qu'est-ce qu'il produit comme sons, sans encore parler ?",
+    options: ["Il babille avec des syllabes comme 'ba ba ba'", "Il produit des sons réguliers et des vocalisations", "Il dit quelques mots simples comme 'mama'", "Il imite les intonations de l'adulte avec précision"],
+    correct: 1,
+    feedback_ok: "Oui. À 3 mois, le bébé produit des sons réguliers et des vocalisations. Le babillage avec des syllabes apparaît vers 6-7 mois.",
+    feedback_ko: "À 3 mois, le bébé produit des sons réguliers et des vocalisations. Le babillage vient vers 6-7 mois, les premiers mots vers 12 mois.",
+    code: "V"
+  },
+  {
+    num: 2, titre: "Le regard qui suit", type: "vf",
+    question: "À 3 mois, le bébé est capable de suivre un objet ou un visage des yeux.",
+    hint: "Pense à ce que l'on observe très tôt chez un nourrisson quand on passe lentement un objet devant lui.",
+    vf_correct: true,
+    feedback_ok: "Vrai. Suivre des yeux (poursuite oculaire) est une compétence présente dès les premières semaines et bien installée à 3 mois. C'est aussi une compétence cognitive précoce liée à l'exploration sensorielle.",
+    feedback_ko: "C'est vrai. À 3 mois, le bébé suit des yeux un objet ou un visage. C'est l'une des premières manifestations de son attention et de son exploration par les sens.",
+    code: "3"
+  },
+  // --- 6 MOIS ---
+  {
+    num: 3, titre: "La position assise", type: "qcm",
+    question: "Comment se caractérise la tenue assise à 6 mois ?",
+    hint: "À cet âge, l'enfant ne peut pas encore tout faire seul dans cette position.",
+    options: ["L'enfant s'assoit seul et se tient sans aide", "L'enfant tient assis uniquement avec un appui extérieur", "L'enfant ne peut pas encore être mis en position assise", "L'enfant s'assoit mais tombe immédiatement"],
+    correct: 1,
+    feedback_ok: "Exact. À 6 mois, l'enfant tient assis avec appui. C'est à 9 mois qu'il s'assoit seul et se maintient sans aide.",
+    feedback_ko: "À 6 mois, l'enfant tient assis avec appui seulement. La tenue assise sans appui s'acquiert vers 9 mois.",
+    code: "I"
+  },
+  {
+    num: 4, titre: "L'attention conjointe", type: "vf",
+    question: "L'attention conjointe, c'est-à-dire regarder ce que l'autre pointe du doigt, apparaît dès 3 mois.",
+    hint: "Réfléchis à ce que cela implique sur le plan cognitif et social : l'enfant doit comprendre que l'autre a une intention.",
+    vf_correct: false,
+    feedback_ok: "Faux. L'attention conjointe apparaît vers 6 mois (regard ce qu'on pointe) et se précise vers 9-10 mois avec le pointage actif de l'enfant lui-même.",
+    feedback_ko: "C'est faux. L'attention conjointe apparaît vers 6 mois. À 3 mois, le bébé regarde les visages et suit des objets, mais il ne partage pas encore l'attention de cette façon.",
+    code: "L"
+  },
+  // --- 9 MOIS ---
+  {
+    num: 5, titre: "La peur de l'étranger", type: "qcm",
+    question: "La peur de l'étranger témoigne d'une acquisition importante. Laquelle ?",
+    hint: "Demande-toi ce que cette peur révèle sur la façon dont l'enfant perçoit son entourage.",
+    options: ["Le développement de la motricité fine", "La mise en place de l'attachement sélectif", "L'apparition du babillage canonique", "La permanence des objets absents"],
+    correct: 1,
+    feedback_ok: "Oui. La peur de l'étranger, qui apparaît vers 8-9 mois, traduit directement la mise en place de l'attachement sélectif : l'enfant distingue maintenant clairement ses figures d'attachement des personnes inconnues.",
+    feedback_ko: "La peur de l'étranger témoigne de la mise en place de l'attachement sélectif. L'enfant distingue ses figures d'attachement des inconnus, ce qui génère cette réaction.",
+    code: "L"
+  },
+  {
+    num: 6, titre: "Le pointage", type: "vf",
+    question: "À 9 mois, l'enfant pointe du doigt pour montrer des objets à l'adulte.",
+    hint: "Le pointage est une compétence communicative importante, mais il y a une nuance sur son apparition exacte.",
+    vf_correct: false,
+    feedback_ok: "Faux, mais c'est subtil. À 9 mois, la dyade enfant-adulte se renforce. Le pointage de l'enfant apparaît plutôt vers 10 mois selon le tableau. À 9 mois, c'est l'adulte qui pointe et l'enfant qui regarde ce qu'on lui montre.",
+    feedback_ko: "C'est faux, avec une nuance. Le pointage actif de l'enfant apparaît vers 10 mois. À 9 mois, c'est surtout la capacité à suivre le pointage de l'adulte qui est en place.",
+    code: "E"
+  },
+  // --- 12 MOIS ---
+  {
+    num: 7, titre: "Les premiers mots", type: "qcm",
+    question: "Parmi ces descriptions, laquelle correspond au développement langagier habituel à 12 mois ?",
+    hint: "Pense à ce qu'on entend typiquement chez un enfant de cet âge, ni trop tôt ni trop tard.",
+    options: ["L'enfant combine déjà deux mots dans une même phrase", "L'enfant dit quelques mots (surtout des noms) et produit des sons reconnaissables", "L'enfant construit des phrases de 3 mots", "L'enfant pose des questions comme 'c'est quoi ça ?'"],
+    correct: 1,
+    feedback_ok: "Oui. À 12 mois, l'enfant dit quelques mots, principalement des noms, et produit des sons de plus en plus reconnaissables. Les combinaisons de mots viennent à 24 mois, les phrases à 3 ans.",
+    feedback_ko: "À 12 mois, l'enfant dit quelques mots (surtout des noms) et des sons reconnaissables. Les combinaisons de 2 mots arrivent à 24 mois, les questions vers 18 mois.",
+    code: "M"
+  },
+  {
+    num: 8, titre: "Cause et effet", type: "vf",
+    question: "La compréhension de la relation cause-effet est une compétence cognitive qui émerge vers 12 mois.",
+    hint: "Observe un enfant de cet âge qui jette un objet par terre et regarde la réaction de l'adulte.",
+    vf_correct: true,
+    feedback_ok: "Vrai. La compréhension cause-effet émerge vers 12 mois dans le domaine cognitif, en même temps que le début de la pensée représentative et l'imitation des gestes.",
+    feedback_ko: "C'est vrai. À 12 mois, l'enfant commence à comprendre la relation cause-effet. C'est une acquisition cognitive importante qui s'accompagne de l'imitation des gestes et du début de la pensée représentative.",
+    code: "E"
+  },
+  // --- 18 MOIS ---
+  {
+    num: 9, titre: "Le vocabulaire à 18 mois", type: "qcm",
+    question: "Quel est le stock de mots habituellement attendu à 18 mois ?",
+    hint: "C'est un repère souvent cité en consultation. Pense à un nombre précis.",
+    options: ["Environ 10 mots simples", "Environ 50 mots, avec des verbes et des adjectifs", "Environ 200 mots", "2 à 3 mots uniquement"],
+    correct: 1,
+    feedback_ok: "Exact. Environ 50 mots à 18 mois, incluant déjà des verbes et des adjectifs, pas uniquement des noms. C'est un repère important à connaître pour les professionnels de la petite enfance.",
+    feedback_ko: "À 18 mois, le repère habituel est d'environ 50 mots, incluant des verbes et des adjectifs. C'est un jalon souvent utilisé pour repérer les retards de langage.",
+    code: "N"
+  },
+  {
+    num: 10, titre: "La théorie de l'esprit", type: "vf",
+    question: "Les prémices de la théorie de l'esprit (comprendre que l'autre a des états mentaux) apparaissent dès 15 mois.",
+    hint: "La théorie de l'esprit complète se développe vers 4-5 ans, mais ses bases sont bien plus précoces.",
+    vf_correct: true,
+    feedback_ok: "Vrai. Dès 15 mois, l'enfant commence à représenter le vécu d'autrui. C'est l'amorce de la théorie de l'esprit, qui se développera pleinement vers 4-5 ans avec la tâche de la fausse croyance.",
+    feedback_ko: "C'est vrai. Les bases de la théorie de l'esprit commencent dès 15 mois : l'enfant représente le vécu d'autrui. La théorie de l'esprit complète (fausse croyance) se développe vers 4-5 ans.",
+    code: "T"
+  },
+  // --- 18 MOIS suite ---
+  {
+    num: 11, titre: "L'imitation différée", type: "qcm",
+    question: "Qu'est-ce que l'imitation différée, observée vers 18 mois ?",
+    hint: "Le mot 'différée' est la clé : il indique quelque chose par rapport au temps.",
+    options: ["Imiter un geste au même moment où l'adulte le produit", "Reproduire un comportement observé un peu plus tôt, en dehors de la situation initiale", "Imiter un geste au ralenti", "Refuser d'imiter l'adulte"],
+    correct: 1,
+    feedback_ok: "Oui. L'imitation différée, c'est reproduire un comportement qu'on a observé antérieurement, sans que le modèle soit présent. C'est une capacité de représentation mentale importante.",
+    feedback_ko: "L'imitation différée, c'est reproduire un comportement observé antérieurement, sans que le modèle soit là. C'est une compétence représentative clé à 18 mois.",
+    code: "A"
+  },
+  {
+    num: 12, titre: "La marche le long des meubles", type: "vf",
+    question: "Marcher le long des meubles en s'appuyant est une acquisition typique de 18 mois.",
+    hint: "Pense à l'ordre des acquisitions motrices de la première année.",
+    vf_correct: false,
+    feedback_ok: "Faux. La marche le long des meubles apparaît vers 12 mois. À 18 mois, la marche seule est acquise : l'enfant n'a plus besoin de s'appuyer sur les meubles.",
+    feedback_ko: "C'est faux. Marcher le long des meubles est une acquisition de 12 mois. À 18 mois, la marche autonome est acquise.",
+    code: "L"
+  },
+  // --- 24 MOIS ---
+  {
+    num: 13, titre: "Le jeu symbolique", type: "qcm",
+    question: "Vers quel âge les jeux symboliques (faire semblant, jouer à la dînette, etc.) s'installent-ils vraiment ?",
+    hint: "Le jeu symbolique nécessite de pouvoir représenter mentalement ce qui n'est pas là.",
+    options: ["9 mois", "12 mois", "24 mois", "3 ans"],
+    correct: 2,
+    feedback_ok: "Exact. Les jeux symboliques s'installent vers 24 mois, en lien avec la permanence des objets absents et la capacité de représentation mentale. À 3 ans, ils deviennent des jeux de groupe et imaginatifs.",
+    feedback_ko: "Les jeux symboliques s'installent vers 24 mois. Ils nécessitent une capacité de représentation mentale (imaginer ce qui n'est pas présent) qui émerge à cet âge.",
+    code: "E"
+  },
+  {
+    num: 14, titre: "La phrase à deux mots", type: "vf",
+    question: "À 24 mois, la plupart des enfants commencent à combiner deux mots dans une même phrase.",
+    hint: "C'est un repère langagier classique, souvent utilisé pour dépister les retards de langage.",
+    vf_correct: true,
+    feedback_ok: "Vrai. La combinaison de deux mots est un marqueur langagier attendu à 24 mois, en même temps que l'apparition du 'Je'. Si ce cap n'est pas atteint, c'est un signal d'alerte.",
+    feedback_ko: "C'est vrai. Combiner deux mots est attendu à 24 mois. C'est un repère important : son absence à cet âge est un signal d'alerte qui justifie un bilan.",
+    code: "S"
+  },
+  // --- 24 MOIS suite ---
+  {
+    num: 15, titre: "La résolution de problèmes", type: "qcm",
+    question: "Comment l'enfant de 24 mois résout-il principalement les problèmes simples ?",
+    hint: "À cet âge, la pensée reste très liée au corps et aux manipulations concrètes.",
+    options: ["En réfléchissant mentalement avant d'agir", "Par l'action directe sur les objets", "En demandant de l'aide à l'adulte systématiquement", "En observant sans intervenir"],
+    correct: 1,
+    feedback_ok: "Oui. À 24 mois, la résolution de problèmes passe encore principalement par l'action. La pensée opératoire, plus abstraite, se développe ensuite progressivement.",
+    feedback_ko: "À 24 mois, l'enfant résout les problèmes simples par l'action directe sur les objets. La pensée abstraite et la planification mentale se développent plus tard.",
+    code: "D"
+  },
+  {
+    num: 16, titre: "Le 'Je'", type: "vf",
+    question: "L'utilisation du pronom 'Je' apparaît typiquement vers 24 mois.",
+    hint: "L'apparition du 'Je' est liée à la conscience de soi comme entité distincte des autres.",
+    vf_correct: true,
+    feedback_ok: "Vrai. L'utilisation du 'Je' vers 24 mois est liée à la conscience de soi accrue. Elle traduit la capacité de l'enfant à se percevoir comme un individu distinct.",
+    feedback_ko: "C'est vrai. Le 'Je' apparaît vers 24 mois, en lien avec la conscience de soi. Avant cet âge, l'enfant parle souvent de lui à la troisième personne ou par son prénom.",
+    code: "E"
+  },
+  // --- 3 ANS ---
+  {
+    num: 17, titre: "Les fonctions exécutives", type: "qcm",
+    question: "Parmi ces capacités, lesquelles font partie des fonctions exécutives en développement à 3 ans ?",
+    hint: "Les fonctions exécutives sont des compétences cognitives de haut niveau qui permettent de réguler son comportement.",
+    options: ["La permanence de l'objet et l'imitation", "La planification, l'inhibition et la flexibilité", "Le babillage et les vocalisations", "L'attachement sélectif et la peur de l'étranger"],
+    correct: 1,
+    feedback_ok: "Exact. La planification, l'inhibition et la flexibilité sont les trois piliers des fonctions exécutives. Elles sont en plein développement à 3 ans et continueront à se consolider jusqu'à l'adolescence.",
+    feedback_ko: "Les fonctions exécutives comprennent la planification, l'inhibition et la flexibilité. Elles sont en développement à 3 ans et se renforcent jusqu'à l'adolescence.",
+    code: "V"
+  },
+  {
+    num: 18, titre: "La structure de phrase", type: "vf",
+    question: "À 3 ans, l'enfant produit des phrases de type sujet-verbe-complément, même si quelques mots sont encore déformés.",
+    hint: "Écoute parler un enfant de 3 ans : il dit des phrases complètes, avec parfois des approximations.",
+    vf_correct: true,
+    feedback_ok: "Vrai. À 3 ans, la structure sujet-verbe-complément est en place. Les mots peuvent encore être légèrement déformés (prononciation imparfaite), mais la syntaxe est là.",
+    feedback_ko: "C'est vrai. À 3 ans, l'enfant construit des phrases sujet-verbe-complément. Certains sons ou mots restent déformés, mais la structure grammaticale de base est acquise.",
+    code: "E"
+  },
+  {
+    num: 19, titre: "Le dessin à 3 ans", type: "qcm",
+    question: "Parmi ces productions graphiques, lesquelles sont attendues vers 3 ans ?",
+    hint: "Observe les dessins d'enfants de cet âge : formes géométriques simples et représentation humaine schématique.",
+    options: ["Des dessins très détaillés avec des personnages reconnaissables", "Un bonhomme têtard, un rond et une croix", "Uniquement des gribouillis sans forme définie", "Des lettres et des chiffres"],
+    correct: 1,
+    feedback_ok: "Oui. Vers 3 ans, l'enfant dessine un bonhomme têtard (tête avec membres directs), trace des ronds et des croix, et empile une tour de 8 cubes. Ce sont des repères grapho-moteurs importants.",
+    feedback_ko: "À 3 ans, les productions attendues sont le bonhomme têtard, le rond et la croix. Les dessins détaillés viennent bien plus tard.",
+    code: "R"
+  },
+  {
+    num: 20, titre: "Les conventions sociales", type: "vf",
+    question: "À 3 ans, l'enfant commence à comprendre les conventions sociales de base, comme dire bonjour ou attendre son tour.",
+    hint: "Les jeux de groupe se développent à cet âge, ce qui implique de comprendre des règles implicites de vie en collectivité.",
+    vf_correct: true,
+    feedback_ok: "Vrai. À 3 ans, l'enfant entre dans les jeux de groupe et imaginatifs, verbalise ses émotions et comprend les conventions sociales de base. C'est une période clé pour la socialisation.",
+    feedback_ko: "C'est vrai. À 3 ans, avec les jeux de groupe et la verbalisation des émotions, l'enfant intègre progressivement les conventions sociales.",
+    code: "S"
+  }
+];
+
+// Code final : V3VLLME NTL AMESD ES → "V3LLEMNTALESDVES" → on prend les 20 codes
+// Codes : V 3 I L L E M E N T A L E S D E V E R S
+// Code final attendu = "V3ILLEMENTA LESDEVE RS" → simplifié pour saisie
+
+const CODE_FINAL = ENIGMES.map(e => e.code).join('');
+// V3ILLEMENTA LESDEVE RS → "V3ILLEMENTALES DEVERS" 
+// Recalcul : V,3,I,L,L,E,M,E,N,T,A,L,E,S,D,E,V,E,R,S = "V3ILLEMENTALES DEVERS"
+
+const CODE_ATTENDU = CODE_FINAL; // "V3ILLEMENTA LESDEVE RS"
+
+let currentQ = 0;
+let score = 0;
+let answered = 0;
+let codeElements = new Array(ENIGMES.length).fill(null);
+let tableauOpen = false;
+
+function startGame() {
+  document.getElementById('screen-intro').style.display = 'none';
+  const sg = document.getElementById('screen-game');
+  sg.style.display = 'flex';
+  sg.style.flexDirection = 'column';
+
+  const slotsEl = document.getElementById('code-slots');
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < ENIGMES.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'code-slot';
+    slot.id = 'slot-' + i;
+    slot.innerHTML = '<span class="code-slot-label">Q' + (i+1) + '</span>';
+    slotsEl.appendChild(slot);
+  }
+
+  currentQ = 0; score = 0; answered = 0;
+  codeElements = new Array(ENIGMES.length).fill(null);
+  renderQuestion(0);
+}
+
+function renderQuestion(idx) {
+  const container = document.getElementById('enigme-container');
+  const e = ENIGMES[idx];
+  updateProgress(idx);
+  tableauOpen = false;
+
+  let optionsHTML = '';
+  if (e.type === 'qcm') {
+    optionsHTML = '<div class="options-grid">' +
+      e.options.map((opt, i) =>
+        '<button class="option-btn" onclick="selectQCM(' + idx + ',' + i + ')" id="opt-' + idx + '-' + i + '">' +
+        '<span class="option-letter">' + ['A','B','C','D'][i] + '</span><span>' + opt + '</span></button>'
+      ).join('') + '</div>';
+  } else {
+    optionsHTML = '<div class="vf-grid">' +
+      '<button class="vf-btn" onclick="selectVF(' + idx + ', true)" id="vf-' + idx + '-true">✓ Vrai</button>' +
+      '<button class="vf-btn" onclick="selectVF(' + idx + ', false)" id="vf-' + idx + '-false">✗ Faux</button>' +
+      '</div>';
+  }
+
+  container.innerHTML =
+    '<div class="enigme-card active">' +
+      '<div class="enigme-header">' +
+        '<div class="enigme-num-badge">' + e.num + '</div>' +
+        '<div class="enigme-type-badge">' + (e.type === 'qcm' ? 'QCM' : 'Vrai / Faux') + '</div>' +
+      '</div>' +
+      '<h2 class="enigme-title">' + e.titre + '</h2>' +
+      '<p class="enigme-question">' + e.question + '</p>' +
+      '<div class="enigme-hint">💡 ' + e.hint + '</div>' +
+      '<button class="tableau-toggle" onclick="toggleTableau()">📋 Consulter le tableau de référence</button>' +
+      '<div class="tableau-wrap" id="tableau-wrap">' + buildTableau() + '</div>' +
+      optionsHTML +
+      '<div class="feedback" id="feedback-' + idx + '"></div>' +
+      '<button class="btn-next" id="btn-next-' + idx + '" onclick="nextQuestion()">' +
+        (idx < ENIGMES.length - 1 ? 'Question suivante →' : 'Voir le code final →') +
+      '</button>' +
+    '</div>';
+}
+
+function selectQCM(idx, optionIdx) {
+  const e = ENIGMES[idx];
+  const isCorrect = optionIdx === e.correct;
+  for (let i = 0; i < e.options.length; i++) {
+    const btn = document.getElementById('opt-' + idx + '-' + i);
+    btn.disabled = true;
+    if (i === e.correct) btn.classList.add('correct');
+    else if (i === optionIdx && !isCorrect) btn.classList.add('wrong');
+  }
+  handleAnswer(idx, isCorrect, e);
+}
+
+function selectVF(idx, choice) {
+  const e = ENIGMES[idx];
+  const isCorrect = choice === e.vf_correct;
+  document.getElementById('vf-' + idx + '-true').disabled = true;
+  document.getElementById('vf-' + idx + '-false').disabled = true;
+  if (e.vf_correct === true) {
+    document.getElementById('vf-' + idx + '-true').classList.add('correct');
+    if (!isCorrect) document.getElementById('vf-' + idx + '-false').classList.add('wrong');
+  } else {
+    document.getElementById('vf-' + idx + '-false').classList.add('correct');
+    if (!isCorrect) document.getElementById('vf-' + idx + '-true').classList.add('wrong');
+  }
+  handleAnswer(idx, isCorrect, e);
+}
+
+function handleAnswer(idx, isCorrect, e) {
+  if (isCorrect) score++;
+  answered++;
+
+  const fb = document.getElementById('feedback-' + idx);
+  fb.style.display = 'block';
+  const slot = document.getElementById('slot-' + idx);
+
+  if (isCorrect) {
+    fb.className = 'feedback correct';
+    fb.innerHTML = '<span class="feedback-icon">✅</span><strong>Bonne réponse !</strong>' + e.feedback_ok;
+    slot.classList.add('filled');
+    slot.innerHTML = e.code + '<span class="code-slot-label">Q' + (idx+1) + '</span>';
+    codeElements[idx] = e.code;
+  } else {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = '<span class="feedback-icon">❌</span><strong>Pas tout à fait…</strong>' + e.feedback_ko;
+    slot.classList.add('missed');
+    slot.innerHTML = '·<span class="code-slot-label">Q' + (idx+1) + '</span>';
+    codeElements[idx] = '·';
+  }
+
+  document.getElementById('btn-next-' + idx).style.display = 'block';
+  updateProgress(idx);
+  updateScoreBadge();
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= ENIGMES.length) {
+    showCodeScreen();
+  } else {
+    renderQuestion(currentQ);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function toggleTableau() {
+  const wrap = document.getElementById('tableau-wrap');
+  if (wrap) { tableauOpen = !tableauOpen; wrap.classList.toggle('open', tableauOpen); }
+}
+
+function updateProgress(idx) {
+  const pct = (idx / ENIGMES.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Question ' + (idx + 1) + ' / ' + ENIGMES.length;
+}
+
+function updateScoreBadge() {
+  document.getElementById('score-badge').textContent = score + ' / ' + answered;
+}
+
+function showCodeScreen() {
+  document.getElementById('screen-game').style.display = 'none';
+  const sc = document.getElementById('screen-code');
+  sc.style.display = 'flex';
+  sc.style.flexDirection = 'column';
+
+  // Afficher les éléments collectés
+  const finalSlots = document.getElementById('code-slots-final');
+  finalSlots.innerHTML = codeElements.map((c, i) =>
+    '<div class="code-slot-final">' + (c && c !== '·' ? c : '<span style="opacity:0.3">·</span>') +
+    '<span>Q' + (i+1) + '</span></div>'
+  ).join('');
+
+  // Créer les inputs de saisie
+  const inputWrap = document.getElementById('code-input-wrap');
+  inputWrap.innerHTML = '';
+  for (let i = 0; i < ENIGMES.length; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.maxLength = 1;
+    inp.className = 'code-input';
+    inp.id = 'cinp-' + i;
+    inp.addEventListener('input', function() {
+      this.value = this.value.toUpperCase().slice(-1);
+      if (this.value && i < ENIGMES.length - 1) {
+        document.getElementById('cinp-' + (i+1)).focus();
+      }
+    });
+    inputWrap.appendChild(inp);
+  }
+  if (document.getElementById('cinp-0')) document.getElementById('cinp-0').focus();
+}
+
+function validateCode() {
+  let entered = '';
+  for (let i = 0; i < ENIGMES.length; i++) {
+    entered += (document.getElementById('cinp-' + i).value || '').toUpperCase();
+  }
+  if (entered === CODE_ATTENDU) {
+    showResult(true);
+  } else {
+    document.getElementById('code-error').textContent = 'Code incorrect. Vérifie tes réponses et réessaie.';
+    setTimeout(() => { document.getElementById('code-error').textContent = ''; }, 3000);
+  }
+}
+
+function showResult(codeValidated) {
+  document.getElementById('screen-code').style.display = 'none';
+  const sr = document.getElementById('screen-result');
+  sr.style.display = 'flex';
+  sr.style.flexDirection = 'column';
+  sr.style.alignItems = 'center';
+  sr.style.justifyContent = 'center';
+
+  const pct = score / ENIGMES.length;
+  let medal = '🏆', title = 'Excellent !', sub = 'Tu maîtrises très bien les repères du développement de l\'enfant de 0 à 3 ans.';
+  if (pct < 0.5) { medal = '📚'; title = 'À consolider'; sub = 'Reprends le tableau de référence attentivement. Tu peux relancer l\'escape game pour t\'entraîner.'; }
+  else if (pct < 0.7) { medal = '👍'; title = 'Bien joué !'; sub = 'Tu as une bonne base. Quelques repères méritent d\'être approfondis, notamment sur les âges précis.'; }
+  else if (pct < 0.9) { medal = '⭐'; title = 'Très bien !'; sub = 'Tu connais bien les repères de développement. Relis les feedbacks des questions manquées pour consolider.'; }
+
+  document.getElementById('result-medal').textContent = medal;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score-big').textContent = score + '/20';
+
+  if (codeValidated) {
+    const msgEl = document.getElementById('message-debloque');
+    msgEl.style.display = 'block';
+    document.getElementById('message-debloque-text').textContent =
+      'Tu as complété avec succès l\'escape game sur le développement de l\'enfant de 0 à 3 ans. Tu es en mesure d\'identifier les grandes acquisitions motrices, langagières, sociales et cognitives de chaque étape clé. Présente ce message à ton formateur ou ta formatrice pour valider ta participation.';
+  }
+}
+
+function restartGame() {
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'flex';
+  document.getElementById('screen-intro').style.flexDirection = 'column';
+  tableauOpen = false;
+}
+
+function buildTableau() {
+  const data = [
+    { age: "3 mois", motricite: "Tient sa tête assis. Tourne vers un son. Regarde ses mains.", langage: "Sons réguliers, vocalisations. Préfère la voix humaine.", social: "Sourire social. Réactions aux visages familiers. Réciprocité.", cognitif: "Suit des yeux. Explore par les sens. Mouvements réflexes." },
+    { age: "6 mois", motricite: "Retournement. Début de la mastication. Tient assis avec appui.", langage: "Babillage (vers 7 mois). Regard ce qu'on pointe. Attention conjointe.", social: "S'intéresse à son reflet. Réactions différenciées selon les personnes.", cognitif: "Début de l'attention conjointe. Exploration des objets à la bouche." },
+    { age: "9 mois", motricite: "S'assoit seul et se déplace à 4 pattes. Commence à se lever en prenant appui.", langage: "Répond à son prénom. Dyade enfant-adulte. Pointage vers 10 mois.", social: "Peur de l'étranger. Attachement sélectif. Jeux de coucou.", cognitif: "Permanence de l'objet. Peut donner des objets sur consigne simple." },
+    { age: "12 mois", motricite: "Marche le long des meubles. Jette et s'intéresse aux objets. Transvasement.", langage: "Quelques mots (noms). Sons reconnaissables. Consignes simples.", social: "S'intéresse aux images. Jeux de tour de rôle. Pointe pour partager l'intérêt.", cognitif: "Imite les gestes. Début de la pensée représentative. Cause-effet." },
+    { age: "18 mois", motricite: "Marche acquise. Moins d'objets à la bouche. Tour de 3 cubes. Tourne les pages.", langage: "Environ 50 mots avec verbes et adjectifs. Pose des questions : c'est quoi, pourquoi.", social: "Conscience de soi accrue. Jeux parallèles. Imitation différée.", cognitif: "Dès 15 mois : représente le vécu d'autrui. Début de la théorie de l'esprit." },
+    { age: "24 mois", motricite: "Court, monte les escaliers. Encastre, tient un crayon. Mange seul.", langage: "Combine 2 mots. Le 'Je'. Comprend les phrases complexes.", social: "Jeux symboliques. S'intéresse aux autres enfants. Partage et échange d'objets.", cognitif: "Permanence des objets absents. Résolution de problèmes simples par l'action." },
+    { age: "3 ans", motricite: "Court et shoote. Bonhomme, rond, croix. Tour de 8 cubes. Lacets. Pédale sur un tricycle.", langage: "Phrase sujet-verbe-complément. Mots peu déformés. Demande des informations. Raconte.", social: "Jeux de groupe et imaginatifs. Verbalise ses émotions. Comprend les conventions sociales.", cognitif: "Fonctions exécutives en développement : planification, inhibition, flexibilité. Catégorise." }
+  ];
+  return '<table class="ref"><thead><tr><th>Âge</th><th>Motricité globale & fine</th><th>Langage verbal & non verbal</th><th>Social & émotionnel</th><th>Cognitif</th></tr></thead><tbody>' +
+    data.map(r => '<tr><td><span class="age-pill">' + r.age + '</span></td><td>' + r.motricite + '</td><td>' + r.langage + '</td><td>' + r.social + '</td><td>' + r.cognitif + '</td></tr>').join('') +
+    '</tbody></table>';
+}
+</script>
+</body>
 </html>
